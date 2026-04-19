@@ -65,18 +65,8 @@ def insert_data(model: Base, **data):
 Roles = ['provider', 'customer']
 Status = ['pending', 'confirmed', 'cancelled', 'completed']
 
-Providers = create_model(
-    'providers',
-    id=Column(String, primary_key=True, default=lambda: str(uuid.uuid4())),
-    name=Column(String, nullable=False),
-    service=Column(String, nullable=False),
-    email=Column(String, nullable=False, unique=True),
-    password=Column(String, nullable=False),
-    created_at=Column(DateTime, nullable=False)
-)
-
-Customers = create_model(
-    'customers',
+Users = create_model(
+    'users',
     id=Column(String, primary_key=True, default=lambda: str(uuid.uuid4())),
     name=Column(String, nullable=False),
     email=Column(String, nullable=False, unique=True),
@@ -87,11 +77,8 @@ Customers = create_model(
 Services = create_model(
     'services',
     id=Column(String, primary_key=True, default=lambda: str(uuid.uuid4())),
-    provider_id=Column(String, ForeignKey('providers.id'), nullable=False),  # Foreign key to Providers table
     name=Column(String, nullable=False),
     description=Column(String, nullable=False),
-    price=Column(Integer, nullable=False),
-    created_at=Column(DateTime, nullable=False)
 )
 
 Bookings = create_model(
