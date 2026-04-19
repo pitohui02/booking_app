@@ -5,11 +5,17 @@ import uuid
 
 from sqlalchemy import Enum, create_engine, inspect, Column, Integer, String, DateTime, ForeignKey
 from sqlalchemy.orm import sessionmaker, DeclarativeBase
+
 from logger_config import logger
+from config import Config
 
+# Credentials
+
+DB_URL = Config.DB_URL
+
+    
 # Instantiate the engine and session
-
-engine = create_engine('sqlite:///booking.db')
+engine = create_engine(DB_URL)
 session = sessionmaker(bind=engine)
 
 # Instance for the base class to create models
