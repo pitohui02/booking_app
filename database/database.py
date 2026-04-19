@@ -1,5 +1,9 @@
 # TODO Create a database connection
 # TODO Create a dynamic function to initialize tables and insertion of data
+import os
+import sys
+from xml.parsers.expat import model
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import uuid
 
@@ -44,6 +48,8 @@ def init_tables(model: Base, ):
         if not inspector.has_table(model.__tablename__):
             model.__table__.create(bind=engine)
             logger.info(f"Table '{model.__tablename__}' created successfully.")
+
+        logger.info(f"Table '{model.__tablename__}' already exists.")
     except Exception as e:
         logger.error(f"Error creating table '{model.__tablename__}': {e}")
         
@@ -51,16 +57,16 @@ def init_tables(model: Base, ):
 # **data: a dictionary of column names and their corresponding values to be inserted into the table
 def insert_data(model: Base, **data):
     try: 
-        session = session()
+        db = session()
         new_record = model(**data)
-        session.add(new_record)
-        session.commit()
-        session.close()
+        db.add(new_record)
+        db.commit()
+        db.close()
         
         logger.info(f"Data inserted successfully into {model.__tablename__}")
     except Exception as e:
+        db.rollback()
         logger.error(f"Error inserting data into {model.__tablename__}: {e}")
-
 
 # ==============================================================================================================================================
 # Instantiate tables 
@@ -68,36 +74,47 @@ def insert_data(model: Base, **data):
 
 # Tables
 
-Roles = ['provider', 'customer']
+Roles = ['admin', 'user']
 Status = ['pending', 'confirmed', 'cancelled', 'completed']
+Invitation = ['accepted', 'declined', 'pending', 'Not Sure']
+Label = ['partner','family', 'friend', 'work', 'other',]
 
 Users = create_model(
     'users',
     id=Column(String, primary_key=True, default=lambda: str(uuid.uuid4())),
     name=Column(String, nullable=False),
+    role = Column(Enum(*Roles, name="role_enum"), nullable=False, default='user'),
     email=Column(String, nullable=False, unique=True),
-    password=Column(String, nullable=False),
+    password_salted_hashed=Column(String, nullable=False),
     created_at=Column(DateTime, nullable=False)
 )
 
-Services = create_model(
-    'services',
+Contacts = create_model(
+    'contacts',
     id=Column(String, primary_key=True, default=lambda: str(uuid.uuid4())),
-    name=Column(String, nullable=False),
-    description=Column(String, nullable=False),
+    user_id = Column(String, ForeignKey('users.id'), nullable=False),  # Foreign key to Users table
+    label = Column(Enum(*Label, name="label_enum"), nullable=False)
 )
 
 Bookings = create_model(
     'bookings',
     id=Column(String, primary_key=True, default=lambda: str(uuid.uuid4())),
-    provider_id=Column(String, ForeignKey('providers.id'), nullable=False),  # Foreign key to Providers table
-    customer_id=Column(String, ForeignKey('customers.id'), nullable=False),  # Foreign key to Customers table
-    service=Column(String, nullable=False),
-    booking_time=Column(DateTime, nullable=False),
-    status=Column(Enum(*Status, name="status_enum"), nullable=False, default='pending'),
+    user_id=Column(String, ForeignKey('users.id'), nullable=False),  # Foreign key to Users table
+    
+    booking_title=Column(String, nullable=False),
+    booking_description=Column(String, nullable=True),
+    start_date=Column(DateTime, nullable=False),
+    end_date=Column(DateTime, nullable=False),
     created_at=Column(DateTime, nullable=False),
+)
+
+Booking_participants = create_model(
+    'booking_participants',
+    id=Column(String, primary_key=True, default=lambda: str(uuid.uuid4())),
+    booking_id=Column(String, ForeignKey('bookings.id'), nullable=False),
+    user_id=Column(String, ForeignKey('users.id'), nullable=False),
+    invitation_status = Column(Enum(*Invitation, name="invitation_status_enum"), nullable=False, default='pending')
 )
 
 if __name__ == "__main__":
     pass
-    # Test
