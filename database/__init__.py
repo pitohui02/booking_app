@@ -1,1 +1,4 @@
-from .database import insert_data, init_tables, Bookings, Booking_participants, Users, Contacts, session
+from database.database import Base, engine, session, create_model, init_tables
+from database.schema import Users, Bookings, Booking_participants
+
+__all__ = ['Base', 'engine', 'session', 'Users', 'Bookings', 'Booking_participants']

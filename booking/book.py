@@ -13,8 +13,8 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from database import insert_data, init_tables, Bookings, Booking_participants, session
 from fastapi import HTTPException
-from logger_config import logger
-from config import Config
+from utils.logger_config import logger
+from utils.config import Config
 from pydantic import BaseModel
 from datetime import datetime
 from typing import List, Optional
